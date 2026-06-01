@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>펜션 업무 관리 — TheBgyeong</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:1.5rem 1rem 4rem}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:8px}
+.app-title{font-size:20px;font-weight:600}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#3b6d11;margin-left:6px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.date-nav{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem}
+.date-nav button{background:#fff;border:1px solid #ddd;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:14px;color:#1a1a1a}
+.date-nav button:hover{background:#f5f5f3}
+.date-display{font-size:15px;font-weight:500;flex:1;text-align:center}
+.date-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;margin-left:6px;font-weight:500}
+.badge-today{background:#eaf3de;color:#3b6d11}
+.badge-past{background:#f1efe8;color:#5f5e5a}
+.badge-future{background:#e6f1fb;color:#185fa5}
+.tabs{display:flex;gap:4px;margin-bottom:1.25rem;flex-wrap:wrap}
+.tab{padding:7px 16px;font-size:13px;border-radius:20px;border:1px solid #ddd;cursor:pointer;background:#fff;color:#666;transition:all .15s}
+.tab.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:500}
+.section-title{font-size:11px;font-weight:600;color:#999;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}
+.task-card{background:#fff;border:1px solid #e8e8e6;border-radius:12px;margin-bottom:8px;overflow:hidden;transition:opacity .2s}
+.task-header{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.task-title{flex:1;font-size:14px;font-weight:500}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+.badge-repeat{background:#e6f1fb;color:#185fa5}
+.badge-once{background:#f1efe8;color:#5f5e5a}
+.badge-urgent{background:#fcebeb;color:#a32d2d}
+.locations{padding:0 14px 12px;display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.loc-btn{border:1px solid #e0e0de;border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;background:#fff;transition:all .15s;user-select:none;-webkit-tap-highlight-color:transparent}
+.loc-btn:active{transform:scale(.95)}
+.loc-btn.doing{border-color:#378add;background:#e6f1fb}
+.loc-btn.done{border-color:#3b6d11;background:#eaf3de}
+.loc-btn.readonly{pointer-events:none;opacity:.55}
+.loc-name{font-size:11px;font-weight:500;display:block;margin-bottom:3px}
+.loc-status{font-size:10px;color:#999}
+.loc-btn.doing .loc-name,.loc-btn.doing .loc-status{color:#185fa5}
+.loc-btn.done .loc-name,.loc-btn.done .loc-status{color:#3b6d11}
+.progress-bar{height:3px;background:#f0f0ee;margin:0 14px 8px;border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:#3b6d11;border-radius:2px;transition:width .3s}
+.pct-label{padding:0 14px 8px;font-size:11px;color:#999}
+.empty{text-align:center;padding:3rem 1rem;color:#999;font-size:14px}
+.empty i{font-size:36px;display:block;margin-bottom:10px}
+.add-form{background:#fff;border:1px solid #e8e8e6;border-radius:12px;padding:16px;margin-bottom:1rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+input,select{width:100%;padding:8px 10px;font-size:13px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1a1a1a;outline:none}
+input:focus,select:focus{border-color:#888}
+.loc-checks{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.loc-check{display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer}
+.loc-check input[type=checkbox]{width:15px;height:15px}
+.btn{padding:8px 16px;font-size:13px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1a1a1a;cursor:pointer;font-weight:500}
+.btn:hover{background:#f5f5f3}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btn-primary:hover{background:#333}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
+.sum-card{background:#fff;border:1px solid #e8e8e6;border-radius:10px;padding:14px;text-align:center}
+.sum-num{font-size:26px;font-weight:600}
+.sum-label{font-size:11px;color:#999;margin-top:3px}
+.notice{border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1rem;font-size:13px;display:flex;align-items:center;gap:8px}
+.notice-future{background:#e6f1fb;border:1px solid #b5d4f4;color:#185fa5}
+.notice-past{background:#f5f5f3;border:1px solid #e8e8e6;color:#888}
+.all-done-banner{background:#eaf3de;border:1px solid #c0dd97;border-radius:12px;padding:1.5rem;text-align:center;color:#3b6d11;font-size:14px;font-weight:500;margin-bottom:1rem}
+.history-group-title{font-size:12px;font-weight:600;color:#999;margin:1rem 0 6px;text-transform:uppercase;letter-spacing:.04em}
+.history-box{background:#fff;border:1px solid #e8e8e6;border-radius:12px;overflow:hidden;margin-bottom:8px}
+.history-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f0f0ee;font-size:13px}
+.history-item:last-child{border-bottom:none}
+.hi-task{flex:1}
+.hi-loc{font-size:11px;color:#999;background:#f5f5f3;padding:2px 8px;border-radius:10px}
+.del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:15px;padding:3px}
+.del-btn:hover{color:#e24b4a}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid #ddd;border-top-color:#888;border-radius:50%;animation:spin .6s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){.locations{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:400px){.locations{grid-template-columns:repeat(3,1fr)}.form-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-bar">
+    <div>
+      <div class="app-title">
+        <i class="ti ti-building-cottage" style="font-size:18px;vertical-align:-2px;margin-right:4px"></i>펜션 업무 관리
+        <span class="live-dot" title="실시간 연결됨"></span>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="toggleForm()"><i class="ti ti-plus"></i> 새 태스크</button>
+  </div>
+
+  <div id="add-form" style="display:none" class="add-form">
+    <div style="font-size:14px;font-weight:500;margin-bottom:12px">새 태스크 추가</div>
+    <div class="form-row">
+      <input id="f-title" placeholder="태스크 이름 (예: 그릴 닦기)">
+      <select id="f-cat">
+        <option value="딥클린">딥클린</option>
+        <option value="보수">보수</option>
+        <option value="점검">점검</option>
+        <option value="기타">기타</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <select id="f-repeat">
+        <option value="0">반복 없음 (일회성)</option>
+        <option value="7">매주 반복</option>
+        <option value="14">2주마다 반복</option>
+        <option value="21">3주마다 반복</option>
+        <option value="30">매월 반복</option>
+      </select>
+      <select id="f-priority">
+        <option value="일반">일반</option>
+        <option value="긴급">긴급</option>
+      </select>
+    </div>
+    <div style="font-size:12px;color:#999;margin-bottom:6px">시작 날짜</div>
+    <div class="form-row">
+      <input type="date" id="f-date">
+      <input id="f-memo" placeholder="메모 (선택)">
+    </div>
+    <div style="font-size:12px;color:#999;margin:8px 0 6px">담당 장소</div>
+    <div class="loc-checks">
+      <label class="loc-check"><input type="checkbox" value="구름" checked> 구름</label>
+      <label class="loc-check"><input type="checkbox" value="바람" checked> 바람</label>
+      <label class="loc-check"><input type="checkbox" value="강" checked> 강</label>
+      <label class="loc-check"><input type="checkbox" value="초원" checked> 초원</label>
+      <label class="loc-check"><input type="checkbox" value="달" checked> 달</label>
+      <label class="loc-check"><input type="checkbox" value="하늘" checked> 하늘</label>
+      <label class="loc-check"><input type="checkbox" value="별" checked> 별</label>
+      <label class="loc-check"><input type="checkbox" value="아침" checked> 아침</label>
+      <label class="loc-check"><input type="checkbox" value="숲" checked> 숲</label>
+      <label class="loc-check"><input type="checkbox" value="노을" checked> 노을</label>
+      <label class="loc-check"><input type="checkbox" value="이슬" checked> 이슬</label>
+      <label class="loc-check"><input type="checkbox" value="풀잎" checked> 풀잎</label>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-primary" onclick="addTask()">추가하기</button>
+      <button class="btn" onclick="toggleForm()">취소</button>
+    </div>
+  </div>
+
+  <div class="date-nav">
+    <button onclick="moveDate(-1)"><i class="ti ti-chevron-left"></i></button>
+    <div class="date-display" id="date-display"></div>
+    <button onclick="moveDate(1)"><i class="ti ti-chevron-right"></i></button>
+    <button onclick="goToday()" style="font-size:12px;padding:6px 12px">오늘</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('day',this)"><i class="ti ti-calendar-event" style="font-size:13px;vertical-align:-1px"></i> 날짜별</button>
+    <button class="tab" onclick="switchTab('tasks',this)"><i class="ti ti-list" style="font-size:13px;vertical-align:-1px"></i> 전체 태스크</button>
+    <button class="tab" onclick="switchTab('history',this)"><i class="ti ti-history" style="font-size:13px;vertical-align:-1px"></i> 완료 기록</button>
+  </div>
+
+  <div id="tab-day"><div class="empty"><span class="spinner"></span>불러오는 중...</div></div>
+  <div id="tab-tasks" style="display:none"></div>
+  <div id="tab-history" style="display:none"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD3r5CYOyRkieA5xNoPu0SWFeJCUbs6KGY",
+  authDomain: "thebgyeong-952e8.firebaseapp.com",
+  projectId: "thebgyeong-952e8",
+  storageBucket: "thebgyeong-952e8.firebasestorage.app",
+  messagingSenderId: "279620834475",
+  appId: "1:279620834475:web:f1045556b3f87d30bcd3ee"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const LOCS = ['구름','바람','강','초원','달','하늘','별','아침','숲','노을','이슬','풀잎'];
+let selectedDate = toStr(new Date());
+let tasks = [];        // task templates
+let dayCache = {};     // { dateStr: { taskId: { locStatus:{} } } }
+let currentTab = 'day';
+let unsubTasks = null;
+let unsubDay = {};
+
+function toStr(d){ return d.toISOString().split('T')[0]; }
+function todayStr(){ return toStr(new Date()); }
+function isPast(d){ return d < todayStr(); }
+function isFuture(d){ return d > todayStr(); }
+function isToday(d){ return d === todayStr(); }
+
+// ── Date display ──────────────────────────────────────────
+function updateDateDisplay(){
+  const d = new Date(selectedDate+'T00:00:00');
+  const label = isToday(selectedDate)?'오늘':isPast(selectedDate)?'과거':'미래';
+  const cls = isToday(selectedDate)?'badge-today':isPast(selectedDate)?'badge-past':'badge-future';
+  document.getElementById('date-display').innerHTML =
+    d.toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'}) +
+    `<span class="date-badge ${cls}">${label}</span>`;
+}
+
+window.moveDate = d => {
+  const dt = new Date(selectedDate+'T00:00:00');
+  dt.setDate(dt.getDate()+d);
+  selectedDate = toStr(dt);
+  updateDateDisplay();
+  if(currentTab==='day') subscribeDay(selectedDate);
+};
+window.goToday = () => {
+  selectedDate = todayStr();
+  updateDateDisplay();
+  if(currentTab==='day') subscribeDay(selectedDate);
+};
+
+// ── Real-time: tasks collection ───────────────────────────
+function subscribeTasks(){
+  if(unsubTasks) unsubTasks();
+  unsubTasks = onSnapshot(collection(db,'tasks'), snap => {
+    tasks = [];
+    snap.forEach(d => tasks.push({id:d.id,...d.data()}));
+    if(currentTab==='day') renderDay();
+    if(currentTab==='tasks') renderTasks();
+  });
+}
+
+// ── Real-time: day status ─────────────────────────────────
+function subscribeDay(dateStr){
+  if(unsubDay[dateStr]) return; // already subscribed
+  unsubDay[dateStr] = onSnapshot(collection(db,`days/${dateStr}/taskStatus`), snap => {
+    dayCache[dateStr] = {};
+    snap.forEach(d => { dayCache[dateStr][d.id] = d.data(); });
+    if(currentTab==='day' && selectedDate===dateStr) renderDay();
+  });
+}
+
+// ── Real-time: history ────────────────────────────────────
+let unsubHistory = null;
+function subscribeHistory(){
+  if(unsubHistory) unsubHistory();
+  unsubHistory = onSnapshot(query(collection(db,'history'),orderBy('ts','desc')), snap => {
+    let items = [];
+    snap.forEach(d => items.push(d.data()));
+    if(currentTab==='history') renderHistoryData(items);
+  });
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function getLS(dateStr, taskId){ return (dayCache[dateStr]&&dayCache[dateStr][taskId]&&dayCache[dateStr][taskId].locStatus)||{}; }
+function locLabel(s){ return s==='doing'?'진행중':s==='done'?'완료':'대기'; }
+function locIcon(s){ return s==='done'?'ti-check':s==='doing'?'ti-clock':'ti-circle'; }
+function badgeInfo(t){
+  if(t.priority==='긴급') return ['badge-urgent','긴급'];
+  if(t.repeat>0) return ['badge-repeat', t.repeat===7?'매주':t.repeat===14?'2주반복':t.repeat===21?'3주반복':'매월'];
+  return ['badge-once','일회성'];
+}
+
+// ── Cycle loc state ───────────────────────────────────────
+window.cycleLocState = async (taskId, loc) => {
+  if(isPast(selectedDate)) return;
+  const dateStr = selectedDate;
+  if(!dayCache[dateStr]) dayCache[dateStr]={};
+  if(!dayCache[dateStr][taskId]) dayCache[dateStr][taskId]={locStatus:{}};
+  const ls = dayCache[dateStr][taskId].locStatus;
+  const cur = ls[loc]||'idle';
+  const next = cur==='idle'?'doing':cur==='doing'?'done':'idle';
+  ls[loc] = next;
+  // Optimistic UI
+  renderDay();
+  // Persist
+  await setDoc(doc(db,`days/${dateStr}/taskStatus/${taskId}`), dayCache[dateStr][taskId]);
+  // History
+  const t = tasks.find(x=>x.id===taskId);
+  if(t && next==='done'){
+    await setDoc(doc(db,`history/${dateStr}_${taskId}_${loc.replace(/[^a-zA-Z가-힣]/g,'')}`),
+      {date:dateStr,taskTitle:t.title,loc,cat:t.cat,ts:Date.now()});
+  }
+  // All done → advance repeat
+  if(t){
+    const allDone = t.locs.every(l=>(dayCache[dateStr][taskId]?.locStatus[l]||'idle')==='done');
+    if(allDone && isToday(dateStr)){
+      if(t.repeat>0){
+        const nd = new Date(dateStr+'T00:00:00');
+        nd.setDate(nd.getDate()+t.repeat);
+        await setDoc(doc(db,'tasks',taskId),{...t,nextDue:toStr(nd)});
+      } else {
+        await deleteDoc(doc(db,'tasks',taskId));
+      }
+    }
+  }
+};
+
+// ── Render: day tab ───────────────────────────────────────
+function renderDay(){
+  const dayTasks = tasks.filter(t => t.nextDue <= selectedDate);
+  const doneList = dayTasks.filter(t=>t.locs.every(l=>(getLS(selectedDate,t.id)[l]||'idle')==='done'));
+  const undone = dayTasks.filter(t=>!t.locs.every(l=>(getLS(selectedDate,t.id)[l]||'idle')==='done'));
+  let html = '';
+
+  if(isToday(selectedDate)){
+    html += `<div class="summary-grid">
+      <div class="sum-card"><div class="sum-num">${dayTasks.length}</div><div class="sum-label">오늘 태스크</div></div>
+      <div class="sum-card"><div class="sum-num" style="color:#3b6d11">${doneList.length}</div><div class="sum-label">완료</div></div>
+      <div class="sum-card"><div class="sum-num" style="color:#185fa5">${undone.length}</div><div class="sum-label">남은 태스크</div></div>
+    </div>`;
+    if(dayTasks.length>0 && undone.length===0)
+      html += `<div class="all-done-banner"><i class="ti ti-circle-check" style="font-size:22px;display:block;margin-bottom:6px"></i>오늘 할 일을 모두 완료했어요! 🎉</div>`;
+  }
+  if(isFuture(selectedDate))
+    html += `<div class="notice notice-future"><i class="ti ti-calendar-plus" style="font-size:16px;flex-shrink:0"></i>미래 날짜예요. 태스크를 미리 배정할 수 있어요. 체크는 당일에만 가능해요.</div>`;
+  if(isPast(selectedDate))
+    html += `<div class="notice notice-past"><i class="ti ti-history" style="font-size:16px;flex-shrink:0"></i>과거 기록이에요. 조회만 가능하고 수정은 불가해요.</div>`;
+
+  if(dayTasks.length===0){
+    html += `<div class="empty"><i class="ti ti-${isFuture(selectedDate)?'calendar-plus':'sun'}"></i>${isFuture(selectedDate)?'이 날짜에 배정된 태스크가 없어요.<br><small>새 태스크로 미리 계획하세요</small>':'이 날짜에 태스크가 없어요'}</div>`;
+  } else if(isToday(selectedDate)){
+    if(undone.length){ html+=`<div class="section-title">진행 중 (${undone.length})</div>`; html+=undone.map(t=>taskCard(t)).join(''); }
+    if(doneList.length){ html+=`<div class="section-title" style="margin-top:1rem">완료 (${doneList.length})</div>`; html+=doneList.map(t=>taskCard(t)).join(''); }
+  } else {
+    html += dayTasks.map(t=>taskCard(t)).join('');
+  }
+  document.getElementById('tab-day').innerHTML = html;
+}
+
+function taskCard(t){
+  const ls = getLS(selectedDate, t.id);
+  const doneCount = t.locs.filter(l=>(ls[l]||'idle')==='done').length;
+  const pct = t.locs.length ? Math.round(doneCount/t.locs.length*100) : 0;
+  const allDone = doneCount===t.locs.length && t.locs.length>0;
+  const [bc,bt] = badgeInfo(t);
+  const readonly = isPast(selectedDate)||isFuture(selectedDate);
+  const locs = t.locs.map(loc=>{
+    const st = ls[loc]||'idle';
+    return `<div class="loc-btn ${st} ${readonly?'readonly':''}" onclick="${readonly?'':'cycleLocState(\''+t.id+'\',\''+loc+'\')'}">
+      <i class="ti ${locIcon(st)}" style="font-size:13px;margin-bottom:2px;display:block"></i>
+      <span class="loc-name">${loc}</span>
+      <span class="loc-status">${locLabel(st)}</span>
+    </div>`;
+  }).join('');
+  return `<div class="task-card" style="${allDone?'opacity:.5':''}">
+    <div class="task-header">
+      <i class="ti ti-clipboard-list" style="font-size:15px;color:#bbb"></i>
+      <span class="task-title">${t.title}${t.memo?` <span style="font-size:11px;color:#bbb;font-weight:400">${t.memo}</span>`:''}</span>
+      <span class="badge ${bc}">${bt}</span>
+      <span style="font-size:11px;color:#999">${t.cat}</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="pct-label">${doneCount}/${t.locs.length} 완료 (${pct}%)</div>
+    <div class="locations">${locs}</div>
+  </div>`;
+}
+
+// ── Render: tasks tab ─────────────────────────────────────
+function renderTasks(){
+  let html = `<div class="section-title">전체 태스크 (${tasks.length})</div>`;
+  if(!tasks.length){ html+=`<div class="empty"><i class="ti ti-clipboard"></i>등록된 태스크가 없어요</div>`; }
+  else {
+    html+=`<div style="background:#fff;border:1px solid #e8e8e6;border-radius:12px;overflow:hidden">`;
+    html+=tasks.map(t=>{
+      const [bc,bt]=badgeInfo(t);
+      const due=t.nextDue>todayStr()?`<span style="font-size:10px;color:#185fa5;background:#e6f1fb;padding:2px 7px;border-radius:10px;margin-left:5px">${t.nextDue}</span>`:'';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #f0f0ee">
+        <i class="ti ti-clipboard-list" style="font-size:15px;color:#bbb;flex-shrink:0"></i>
+        <span style="flex:1;font-size:14px;font-weight:500">${t.title}${due}</span>
+        <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+          ${t.locs.map(l=>`<span style="font-size:10px;background:#f5f5f3;border-radius:8px;padding:2px 6px;color:#666">${l}</span>`).join('')}
+          <span class="badge ${bc}">${bt}</span>
+          <button class="del-btn" onclick="deleteTask('${t.id}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>`;
+    }).join('');
+    html+=`</div>`;
+  }
+  document.getElementById('tab-tasks').innerHTML = html;
+}
+
+// ── Render: history tab ───────────────────────────────────
+function renderHistoryData(items){
+  let html = `<div class="section-title">완료 기록 (${items.length}건)</div>`;
+  if(!items.length){ html+=`<div class="empty"><i class="ti ti-history"></i>완료 기록이 없어요</div>`; }
+  else {
+    const grouped = {};
+    items.forEach(h=>{ if(!grouped[h.date]) grouped[h.date]=[]; grouped[h.date].push(h); });
+    Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).forEach(date=>{
+      const d = new Date(date+'T00:00:00');
+      html+=`<div class="history-group-title">${d.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'})}</div>`;
+      html+=`<div class="history-box">`;
+      grouped[date].forEach(h=>{
+        html+=`<div class="history-item">
+          <span class="hi-task">${h.taskTitle}</span>
+          <span class="hi-loc">${h.loc}</span>
+          <span class="badge badge-once">${h.cat}</span>
+        </div>`;
+      });
+      html+=`</div>`;
+    });
+  }
+  document.getElementById('tab-history').innerHTML = html;
+}
+
+// ── UI controls ───────────────────────────────────────────
+window.switchTab = (name, btn) => {
+  currentTab = name;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['day','tasks','history'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===name?'block':'none';
+  });
+  if(name==='history') subscribeHistory();
+  if(name==='tasks') renderTasks();
+  if(name==='day'){ subscribeDay(selectedDate); renderDay(); }
+};
+
+window.toggleForm = () => {
+  const f = document.getElementById('add-form');
+  f.style.display = f.style.display==='none'?'block':'none';
+  if(f.style.display==='block') document.getElementById('f-date').value = selectedDate;
+};
+
+window.addTask = async () => {
+  const title = document.getElementById('f-title').value.trim();
+  if(!title){ alert('태스크 이름을 입력해주세요'); return; }
+  const locs = [...document.querySelectorAll('.loc-checks input:checked')].map(x=>x.value);
+  if(!locs.length){ alert('장소를 최소 1개 선택해주세요'); return; }
+  const startDate = document.getElementById('f-date').value || todayStr();
+  const id = 'task_'+Date.now();
+  const newTask = {
+    id, title,
+    cat: document.getElementById('f-cat').value,
+    repeat: parseInt(document.getElementById('f-repeat').value),
+    priority: document.getElementById('f-priority').value,
+    locs, memo: document.getElementById('f-memo').value.trim(),
+    createdAt: todayStr(), nextDue: startDate
+  };
+  await setDoc(doc(db,'tasks',id), newTask);
+  document.getElementById('f-title').value='';
+  document.getElementById('f-memo').value='';
+  toggleForm();
+};
+
+window.deleteTask = async id => {
+  if(!confirm('이 태스크를 삭제할까요?')) return;
+  await deleteDoc(doc(db,'tasks',id));
+};
+
+// ── Seed sample data if empty ─────────────────────────────
+async function seedIfEmpty(){
+  const snap = await getDocs(collection(db,'tasks'));
+  if(snap.size===0){
+    const samples = [
+      {id:'task_1',title:'그릴 닦기',cat:'딥클린',repeat:14,priority:'일반',locs:LOCS,memo:'',createdAt:'2026-06-01',nextDue:'2026-06-01'},
+      {id:'task_2',title:'에어컨 필터 청소',cat:'점검',repeat:21,priority:'일반',locs:LOCS,memo:'',createdAt:'2026-06-01',nextDue:'2026-06-01'},
+      {id:'task_3',title:'욕실 줄눈 보수',cat:'보수',repeat:0,priority:'긴급',locs:['강'],memo:'강 2층',createdAt:'2026-06-01',nextDue:'2026-06-01'},
+      {id:'task_4',title:'마당 잡초 제거',cat:'기타',repeat:14,priority:'일반',locs:['구름','초원','숲','풀잎'],memo:'',createdAt:'2026-06-01',nextDue:'2026-06-01'},
+    ];
+    for(const t of samples) await setDoc(doc(db,'tasks',t.id),t);
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────
+updateDateDisplay();
+await seedIfEmpty();
+subscribeTasks();
+subscribeDay(selectedDate);
+</script>
+</body>
+</html>
